@@ -1,0 +1,17 @@
+extends layout
+
+block content
+  h1 Sigicom to VDV DataLink
+  hr
+  .row
+    .col
+      h3 Data Search
+      p Search for sigicom sensor data 
+        a(href='/search') here.
+      h3 Configure the application
+      p Configure frequency of the export from sigicom and import to VDV, email addresses, the name of this application 
+        | amongst other things 
+        a(href='/config') here.
+      h3 Job History
+      p View the history of import/export jobs 
+        a(href='/history') here.

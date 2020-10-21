@@ -1,0 +1,21 @@
+apiVersion: mongodb.com/v1
+kind: MongoDB
+metadata:
+  name: mongo-standalone
+spec:
+  version: 4.2.2
+  opsManager:
+    configMapRef:
+      name: mongo-standalone
+  credentials: k8-training
+  type: Standalone
+  persistent: true
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: mongodb-standalone
+data:
+  mongo.conf: |
+    storage:
+      dbPath: /data/db

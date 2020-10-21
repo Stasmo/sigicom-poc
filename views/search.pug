@@ -1,0 +1,94 @@
+extends layout
+
+block content
+    h1 Search
+    form(action="", method="post")
+        input(type='hidden', name='_csrf', value=_csrf)
+        .row.mt-4
+            .col
+                .form-group
+                    h5(for='exampleFormControlSelect2') Select sensor IDs
+                    select#exampleFormControlSelect2.form-control(multiple='' name="sensors[]" required)
+                        each item in sensors
+                            option(value=item)=item.serial
+            .col
+                h5 Data types
+                .form-check
+                    input#transient.form-check-input(type="checkbox" name="transient" checked)
+                    label.form-check-label(for="transient") Transient
+                .form-check
+                    input#transient.form-check-input(type="checkbox" name="blast" checked)
+                    label.form-check-label(for="blast") Blast
+                .form-check
+                    input#transient.form-check-input(type="checkbox" name="interval" checked)
+                    label.form-check-label(for="interval") Interval
+                .form-check
+                    input#transient.form-check-input(type="checkbox" name="monon")
+                    label.form-check-label(for="monon") Monon
+                .form-check
+                    input#transient.form-check-input(type="checkbox" name="sio")
+                    label.form-check-label(for="sio") Sio
+        .row.mt-4
+            .col
+                h5 Timezone
+                select#tz.form-control(type='select' name='tz')
+                    each tz in timezones
+                        option(value=tz)=tz
+        .row.mt-4
+            .col
+                h5 From date
+                input.form-control(type='datetime-local', name='from' required)
+            .col
+                h5 To date
+                input.form-control(type='datetime-local', name='to')
+        .row.mt-4
+            .col
+                button.btn.btn-primary(type="submit") Search
+        if searchHistory
+            .row.mt-4
+                .col
+                    h3 Running searches
+                    table.table
+                        thead.thead-dark
+                            tr
+                                th Search ID
+                                th Data types
+                                th Search date range
+                        tbody
+                            each row in searchHistory.filter(s => !s.finished_at).sort((a, b) => a.finished_at > b.finished_at ? -1 : 1)
+                                tr
+                                    td=row.id
+                                    td=Object.keys(row.data_types).filter(a => row.data_types[a]).join(',')
+                                    td=row.datetime_from + (row.datetime_to ? " - " + row.datetime_to : "")
+            .row.mt-4
+                .col
+                    h3 Finished Searches
+                    table.table
+                        thead.thead-dark
+                            tr
+                                th Search ID
+                                th Data types
+                                th Search date range
+                                th Finished at
+                        tbody
+                            each row in searchHistory.filter(s => s.finished_at).sort((a, b) => a.finished_at > b.finished_at ? -1 : 1)
+                                tr
+                                    td
+                                        a(href=`/search/${row.id}`)=row.id
+                                    if row.data_types
+                                        td=Object.keys(row.data_types).filter(a => row.data_types[a]).join(',')
+                                    else
+                                        td
+                                    td=row.datetime_from + (row.datetime_to ? " - " + row.datetime_to : "")
+                                    td=row.finished_at
+
+        if data
+            .row.mt-4
+                .col
+                    p=JSON.stringify(data)
+
+block scripts
+    script.
+        let timezone = moment.tz.guess()
+        console.log(timezone)
+        $(`#tz option[value="${timezone}"`).attr('selected', 'true')

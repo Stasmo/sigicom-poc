@@ -1,0 +1,78 @@
+extends layout
+
+block head
+    script(src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.3/Chart.bundle.min.js")
+
+block content
+    - var sensorIds = searchData.map(d => d.serial);
+    h1 Search results for #{sensorIds.join(',')}
+    .row.mt-2
+        .col
+            h3 Dates
+            p From: #{new Date(meta.timestamp_from * 1000)}
+            p To: #{new Date(meta.timestamp_to * 1000)}
+        .col
+            h3 Push data to VDV
+            form(action=`/search/${searchId}/push` method="POST")
+                .form-check
+                    input#defaultCheck1.form-check-input(name="pushInterval" type='checkbox' checked=pushInterval)
+                    label.form-check-label(for='defaultCheck1')
+                        | Push interval data
+                .form-check.mt-2
+                    input#defaultCheck2.form-check-input(name="pushTransient" type='checkbox' checked=pushTransient)
+                    label.form-check-label(for='defaultCheck2')
+                        | Push transient data
+                input(type='hidden', name='_csrf', value=_csrf)
+                button.mt-2.btn.btn-primary(type="submit") Push
+    each search in searchData
+        .row.mt-2
+            .col
+                h2 Serial: #{search.serial}
+                each data_type in ['Transient', 'Interval']
+                    - var lp = data_type.toLowerCase()
+                    - var lps = data_type.toLowerCase() + 's'
+                    h3=data_type
+                    table.table.table-striped
+                        thead.thead-dark
+                            tr
+                                th Timestamp
+                                th V (mm/s)
+                                th Vf
+                                th L (mm/s)
+                                th Lf
+                                th T (mm/s)
+                                th Tf
+                                th Action
+                        tbody
+                            each row, index in search[lps]
+                                tr
+                                    td=row.timestamp
+                                    td=row.V
+                                    td=row.Vf
+                                    td=row.L
+                                    td=row.Lf
+                                    td=row.T
+                                    td=row.Tf
+                                    td
+                                        if lp == 'transient'
+                                            button.btn.btn-secondary.btn-small.show-trans-button View
+                                if lp == 'transient'
+                                    tr.d-none
+                                        td(colspan=8)
+                                            table.table
+                                                tbody
+                                                    each wave of transientData[index]['data']
+                                                        tr
+                                                            td=wave[0]
+                                                            td=wave[1]
+                                                            td=wave[2]
+                                                            td=wave[3]
+                            else
+                                tr
+                                    td(colspan=7) No #{lp} data
+block scripts
+    script.
+        $('.show-trans-button').click(e => {
+            $btn = $(e.target)
+            $btn.parent().parent().next().toggleClass('d-none')
+        })

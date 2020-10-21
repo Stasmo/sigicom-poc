@@ -1,0 +1,78 @@
+extends layout
+
+block head
+    style.
+        .sensor-id {
+            max-width: 200px;
+            display: inline-block;
+        }
+        .sensor-id-container {
+            padding: 5px;
+        }
+
+block content
+    h1 System configuration
+    form(action="", method="post")
+        input(type='hidden', name='_csrf', value=_csrf)
+        .row
+            .col
+                .row
+                    .col
+                        label App Name
+                        input.form-control(name="appName" type="text" placeholder="App Name" value=appName required)
+                        p The name of the application
+                hr
+                .row
+                    .col
+                        label Send emails from this address
+                        input.form-control(name="fromEmailAddress" type="email" placeholder="Email address" value=fromEmailAddress required)
+                        p Emails for resetting password, alerting, etc
+            .col
+                .form-group
+                    label(for='exampleFormControlSelect2') Select sensor IDs
+                    select#exampleFormControlSelect2.form-control(name="sensorIds[]" multiple='')
+                        each item in sensors
+                            option(value=item.serial selected=(sensorIds.includes(item.serial.toString()))) #{item.serial} (#{item.type})
+                    p These are the sensors for which to collect data and send to VDV.
+        hr
+        .row.mt-2
+            .col
+                label Collect range
+                input.form-control(name="collectRange" type="text" placeholder="Seconds" value=collectRange required)
+                p Number of seconds of data to collect. You'll have to do some math if you want to adjust it. Set it at 3600 if you're collecting data every hour, 1800 if collecting data every 30min, etc.
+
+            .col
+                label Search cron schedule
+                input.form-control(name="cronPattern" type="text" placeholder="Cron pattern" value=cronPattern required)
+                p Read up on cron patterns 
+                    a(href="http://crontab.org/") here. 
+                    | Example: 0 15 * * * * means collect data at second = 0, minute = 15, hour = every hour, month = every month, year = every year.
+            .col
+                .form-check
+                    input#defaultCheck1.form-check-input(name="enableCron" type='checkbox' checked=enableCron value="true")
+                    label.form-check-label(for='defaultCheck1')
+                        | Enable job
+                    p Run the data pump or not.
+                .form-check
+                    input#defaultCheck2.form-check-input(name="enableInterval" type='checkbox' checked=enableInterval value="true")
+                    label.form-check-label(for='defaultCheck2')
+                        | Enable interval data
+                .form-check
+                    input#defaultCheck3.form-check-input(name="enableTransient" type='checkbox' checked=enableTransient value="true")
+                    label.form-check-label(for='defaultCheck3')
+                        | Enable transient data
+                hr
+                .form-check
+                    input#defaultCheck2.form-check-input(name="alertWhenSyncFailed" type='checkbox' checked=alertWhenSyncFailed value="true")
+                    label.form-check-label(for='defaultCheck2')
+                        | Send email if sync fails
+                    p Just a simple email stating that the sync failed.
+                hr
+                .form-group
+                    label Send to this address
+                    input.form-control(name="alertEmailAddress" type="text" placeholder="Email address" value=alertEmailAddress)
+                    p Comma separated list of email addresses.
+
+
+        hr
+        button.btn.btn-primary(type="submit") Save
